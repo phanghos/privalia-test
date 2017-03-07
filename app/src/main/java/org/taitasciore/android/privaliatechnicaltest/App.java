@@ -20,15 +20,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        /*
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return;
-        }
-        refWatcher = LeakCanary.install(this);
-        */
-
         Fresco.initialize(this);
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/OpenSans-Regular.ttf")

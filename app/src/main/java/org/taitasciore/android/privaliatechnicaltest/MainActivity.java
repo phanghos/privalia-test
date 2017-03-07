@@ -70,59 +70,19 @@ public class MainActivity extends AppCompatActivity implements MainView {
             mWorkerFragment = new WorkerFragment();
             fm.beginTransaction().add(mWorkerFragment, "worker").commit();
         } else if (savedInstanceState == null) {
-            if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) handleSearchIntent(getIntent());
+            if (Intent.ACTION_SEARCH.equals(getIntent().getAction()))
+                handleSearchIntent(getIntent());
             else mWorkerFragment.getMoviesList();
         } else {
-            if (savedInstanceState.containsKey("query")) query = savedInstanceState.getString("query");
+            if (savedInstanceState.containsKey("query"))
+                query = savedInstanceState.getString("query");
             if (savedInstanceState.containsKey("list")) {
                 ArrayList<MovieResponse.Movie> list = (ArrayList<MovieResponse.Movie>)
                         savedInstanceState.getSerializable("list");
                 setData(list);
             }
         }
-
-        /*
-        if (savedInstanceState != null) {
-            service = new MovieService(this);
-            int pg = savedInstanceState.getInt("page");
-            service.setPage(pg);
-            if (savedInstanceState.containsKey("query")) query = savedInstanceState.getString("query");
-            if (savedInstanceState.containsKey("list")) {
-                ArrayList<MovieResponse.Movie> list = (ArrayList<MovieResponse.Movie>)
-                        savedInstanceState.getSerializable("list");
-                setData(list);
-            }
-        }
-        */
-
-        /*
-        service = new MovieService(this);
-
-        if (savedInstanceState == null) {
-            if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) handleSearchIntent(getIntent());
-            else service.getMoviesList();
-        }
-        else {
-            int pg = savedInstanceState.getInt("page");
-            service.setPage(pg);
-            if (savedInstanceState.containsKey("query")) query = savedInstanceState.getString("query");
-            if (savedInstanceState.containsKey("list")) {
-                ArrayList<MovieResponse.Movie> list = (ArrayList<MovieResponse.Movie>)
-                        savedInstanceState.getSerializable("list");
-                setData(list);
-            }
-        }
-        */
     }
-
-    /*
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        RefWatcher refWatcher = App.getRefWatcher(this);
-        refWatcher.watch(this);
-    }
-    */
 
     @Override
     protected void attachBaseContext(Context newBase) {
