@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Privalia Technical Test</string>
-    <string name="search_label">Search for movies</string>
+    <string name="app_name">Privalia Test</string>
     <string name="search_hint">Type keywords...</string>
 </resources>

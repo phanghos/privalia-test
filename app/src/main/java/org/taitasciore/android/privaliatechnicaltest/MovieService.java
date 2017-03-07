@@ -19,8 +19,8 @@ public class MovieService {
 
     private int pg; // Current page used for pagination
     private MainView view; // Current view (context)
-    private Retrofit mRetrofit;
-    private MovieDbApi mApi;
+    private Retrofit retrofit;
+    private MovieDbApi api;
     private Call<MovieResponse> curCall; // Current call in case it needs to be cancelled
 
     public MovieService(MainView view) {
@@ -30,23 +30,23 @@ public class MovieService {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 
-        mRetrofit = new Retrofit.Builder()
+        retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.themoviedb.org/3/")
                 .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
                 .build();
 
-        mApi = mRetrofit.create(MovieDbApi.class);
+        api = retrofit.create(MovieDbApi.class);
     }
 
     public void destroy() {
         view = null;
-        mRetrofit = null;
-        mApi = null;
+        retrofit = null;
+        api = null;
         curCall = null;
     }
 
     /**
-     * The method first checks for connection
+     * This method first checks for connection
      * If true, it executes the call asynchronously
      * Else, a Toast is shown with the error (network error)
      *
@@ -54,7 +54,7 @@ public class MovieService {
      * meaning the screen is blank
      */
     public void getMoviesList() {
-        Call<MovieResponse> call = mApi.getMoviesList(pg);
+        Call<MovieResponse> call = api.getMoviesList(pg);
         boolean isConnected = NetworkUtils.isConnected((MainActivity) view);
         if (!isConnected) {
             view.showNetworkError();
@@ -93,9 +93,8 @@ public class MovieService {
             view.hideRefreshLayout();
             return;
         }
-        curCall = mApi.searchMovieByKeyword(query, pg);
-
-        Callback<MovieResponse> callback = new Callback<MovieResponse>() {
+        curCall = api.searchMovieByKeyword(query, pg);
+        curCall.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 view.hideProgressWheel();
@@ -116,9 +115,7 @@ public class MovieService {
                 view.hideProgressWheel();
                 view.hideRefreshLayout();
             }
-        };
-
-        curCall.enqueue(callback);
+        });
     }
 
     public int getPage() {

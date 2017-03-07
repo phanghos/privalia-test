@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -69,10 +70,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
         if (mWorkerFragment == null) {
             mWorkerFragment = new WorkerFragment();
             fm.beginTransaction().add(mWorkerFragment, "worker").commit();
-        } else if (savedInstanceState == null) {
-            if (Intent.ACTION_SEARCH.equals(getIntent().getAction()))
-                handleSearchIntent(getIntent());
-            else mWorkerFragment.getMoviesList();
         } else {
             if (savedInstanceState.containsKey("query"))
                 query = savedInstanceState.getString("query");
@@ -103,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.item_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint(getString(R.string.search_hint));
 
@@ -113,24 +109,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
             searchItem.expandActionView();
             searchView.setQuery(query, false);
             searchView.clearFocus();
-            // Hide keyboard after expaning SearchView and setting text
+            // Hide keyboard after expanding SearchView and setting text
             // Remove this line to show keyboard (default behavior)
         }
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                /*
-                if (query.isEmpty()) return false;
-
-                Intent i = new Intent(Intent.ACTION_SEARCH);
-                i.setClass(getApplicationContext(), MainActivity.class);
-                i.putExtra(SearchManager.QUERY, query);
-                startActivity(i);
-                searchItem.collapseActionView();
-
-                return true;
-                */
                 return false;
             }
 
@@ -139,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 query = newText;
                 if (!query.isEmpty()) {
                     mWorkerFragment.searchMovieByKeyword(query, true);
-                    //setTitle("Results for '" + query + "'");
                 }
                 return false;
             }
@@ -149,25 +133,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void setTitle(String title) {
         getSupportActionBar().setTitle(title);
-    }
-
-    private void handleSearchIntent(Intent intent) {
-        query = intent.getStringExtra(SearchManager.QUERY);
-        setTitle("Results for '" + query + "'");
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mWorkerFragment.searchMovieByKeyword(query, true);
     }
 
     private void showEmptyText() {

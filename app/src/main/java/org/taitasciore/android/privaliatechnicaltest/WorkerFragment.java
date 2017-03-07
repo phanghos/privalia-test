@@ -12,8 +12,8 @@ import android.util.Log;
 
 public class WorkerFragment extends Fragment {
 
-    MainView view;
-    MovieService service;
+    private MainView view;
+    private MovieService service;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +39,7 @@ public class WorkerFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        service.destroy();
         view = null;
         service = null;
     }
