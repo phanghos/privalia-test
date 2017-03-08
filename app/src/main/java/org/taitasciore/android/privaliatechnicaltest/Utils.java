@@ -13,8 +13,8 @@ public final class Utils {
         Snackbar.make(v, msg, Snackbar.LENGTH_LONG).show();
     }
 
-    public static void showSnackbar(View v, View.OnClickListener listener) {
-        Snackbar.make(v, "Something went wrong", Snackbar.LENGTH_LONG)
+    public static void showSnackbar(View v, String msg, View.OnClickListener listener) {
+        Snackbar.make(v, msg, Snackbar.LENGTH_LONG)
                 .setAction("try again", listener)
                 .show();
     }

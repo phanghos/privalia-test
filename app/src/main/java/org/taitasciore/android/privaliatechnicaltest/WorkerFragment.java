@@ -37,6 +37,10 @@ public class WorkerFragment extends Fragment {
         view = null;
     }
 
+    /**
+     * It will most likely be detected by the JVM's garbage collector
+     * but added code anyway just in case, so there are no more references to the objects
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();

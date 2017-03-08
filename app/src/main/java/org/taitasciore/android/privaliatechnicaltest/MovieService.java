@@ -17,6 +17,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MovieService {
 
+    private static final String BASE_URL = "https://api.themoviedb.org/3/";
+
     private int pg; // Current page used for pagination
     private MainView view; // Current view (context)
     private Retrofit retrofit;
@@ -35,13 +37,17 @@ public class MovieService {
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org/3/")
+                .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
                 .build();
 
         api = retrofit.create(MovieDbApi.class);
     }
 
+    /**
+     * It will most likely be detected by the JVM's garbage collector
+     * but added code anyway just in case, so there are no more references to the objects
+     */
     public void destroy() {
         view = null;
         retrofit = null;

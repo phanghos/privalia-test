@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Privalia Test</string>
     <string name="search_hint">Type keywords...</string>
+    <string name="toolbar_title">Popular movies</string>
+    <string name="network_error">Please check your internet connection</string>
+    <string name="response_error">"Something went wrong"</string>
+    <string name="no_more_results">No more results available</string>
 </resources>

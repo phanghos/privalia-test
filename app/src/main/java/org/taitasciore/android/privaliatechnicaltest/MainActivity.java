@@ -21,6 +21,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -33,6 +34,14 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * setRetainInstance(boolean) is the responsible method for this behavior
  */
 public class MainActivity extends AppCompatActivity implements MainView {
+
+    private static final String TAG_WORKER_FRAGMENT = "worker";
+
+    @BindString(R.string.toolbar_title) String toolbarTitle;
+    @BindString(R.string.search_hint) String searchHint;
+    @BindString(R.string.network_error) String networkError;
+    @BindString(R.string.response_error) String responseError;
+    @BindString(R.string.no_more_results) String noMoreResults;
 
     String query = ""; // Search query
 
@@ -61,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        setTitle("Popular movies");
+        setTitle(toolbarTitle);
 
         mLayoutMngr = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutMngr);
@@ -75,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements MainView {
         });
 
         FragmentManager fm = getSupportFragmentManager();
-        mWorkerFragment = (WorkerFragment) fm.findFragmentByTag("worker");
+        mWorkerFragment = (WorkerFragment) fm.findFragmentByTag(TAG_WORKER_FRAGMENT);
         if (mWorkerFragment == null) {
             mWorkerFragment = new WorkerFragment();
-            fm.beginTransaction().add(mWorkerFragment, "worker").commit();
+            fm.beginTransaction().add(mWorkerFragment, TAG_WORKER_FRAGMENT).commit();
         } else {
             if (savedInstanceState.containsKey("query"))
                 query = savedInstanceState.getString("query");
@@ -109,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         final MenuItem searchItem = menu.findItem(R.id.item_search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setIconifiedByDefault(false);
-        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setQueryHint(searchHint);
 
         // Expand SearchView if EditText was not empty before screen orientation change
         // and set text
@@ -133,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 if (!mWorkerFragment.getList().isEmpty()) {
                     mWorkerFragment.cancelPendingRequests();
                     setData(mWorkerFragment.getList());
-                    setTitle("Popular movies");
+                    setTitle(toolbarTitle);
                 }
             }
         });
@@ -171,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 if (query.isEmpty() && !mWorkerFragment.getList().isEmpty()) {
                     mWorkerFragment.cancelPendingRequests();
                     setData(mWorkerFragment.getList());
-                    setTitle("Popular movies");
+                    setTitle(toolbarTitle);
                 }
                 else
                     mWorkerFragment.searchMovieByKeyword(query, true);
@@ -214,17 +223,17 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     @Override
     public void showEmptyListError() {
-        Utils.showSnackbar(layout, "No more results available");
+        Utils.showSnackbar(layout, noMoreResults);
     }
 
     @Override
     public void showNetworkError() {
-        Utils.showSnackbar(layout, "Please check your internet connection");
+        Utils.showSnackbar(layout, networkError);
     }
 
     @Override
     public void showResponseErrorForMovies() {
-        Utils.showSnackbar(layout, new View.OnClickListener() {
+        Utils.showSnackbar(layout, responseError, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mWorkerFragment.getMoviesList();
@@ -234,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     @Override
     public void showResponseErrorForSearch(final String query, final boolean newSearch) {
-        Utils.showSnackbar(layout, new View.OnClickListener() {
+        Utils.showSnackbar(layout, responseError, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mWorkerFragment.searchMovieByKeyword(query, newSearch);
