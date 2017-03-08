@@ -71,17 +71,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         setTitle(toolbarTitle);
-
-        mLayoutMngr = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutMngr);
-
-        mRefreshLayout.setOnRefreshListener(new SwipyRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh(SwipyRefreshLayoutDirection direction) {
-                if (query != null && !query.isEmpty()) mWorkerFragment.searchMovieByKeyword(query);
-                else mWorkerFragment.getMoviesList();
-            }
-        });
+        setupRecyclerView();
+        addRefreshListener();
 
         FragmentManager fm = getSupportFragmentManager();
         mWorkerFragment = (WorkerFragment) fm.findFragmentByTag(TAG_WORKER_FRAGMENT);
@@ -264,5 +255,20 @@ public class MainActivity extends AppCompatActivity implements MainView {
         if (mAdapter != null)
             for (MovieResponse.Movie m : list)
                 mAdapter.add(m);
+    }
+
+    private void setupRecyclerView() {
+        mLayoutMngr = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutMngr);
+    }
+
+    private void addRefreshListener() {
+        mRefreshLayout.setOnRefreshListener(new SwipyRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh(SwipyRefreshLayoutDirection direction) {
+                if (query != null && !query.isEmpty()) mWorkerFragment.searchMovieByKeyword(query);
+                else mWorkerFragment.getMoviesList();
+            }
+        });
     }
 }
