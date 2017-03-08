@@ -85,7 +85,7 @@ public class MovieService {
                     for (MovieResponse.Movie m : list) listPopular.add(m);
                     if (getPage() == 1) view.setData(list); // Create adapter if requesting first page
                     else view.addItems(list); // Add items to existing adapter otherwise
-                    pg++;
+                    if (!list.isEmpty()) pg++; // Increment page if and only if results were returned;
                 }
                 else
                     view.showResponseErrorForMovies();
@@ -128,7 +128,7 @@ public class MovieService {
                     }
                     else if (getPage() == 1) view.setData(list);
                     else view.addItems(list);
-                    pg++;
+                    if (!list.isEmpty()) pg++; // Increment page if and only if results were returned;
                     view.setTitle("Results for '" + query + "'");
                 }
                 else
