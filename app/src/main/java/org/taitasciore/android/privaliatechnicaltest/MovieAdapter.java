@@ -41,9 +41,7 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
-    private static String BASE_URL_IMG = "https://image.tmdb.org/t/p/";
-    private static final String BASE_URL_IMG_PHONE = BASE_URL_IMG + "w500/";
-    private static final String BASE_URL_IMG_TABLET = BASE_URL_IMG + "w780/";
+    private static String BASE_URL_IMG = "https://image.tmdb.org/t/p/w500/";
 
     Activity context;
     ArrayList<MovieResponse.Movie> list;
@@ -63,11 +61,32 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         MovieResponse.Movie m = list.get(position);
+
         holder.title.setText(buildSpan(m.getTitle(), getYear(m.getReleaseDate())),
                 TextView.BufferType.SPANNABLE);
-        holder.overview.setText(m.getOverview());
-        Uri uri = Uri.parse(BASE_URL_IMG_PHONE + m.getPosterPath());
-        holder.img.setImageURI(uri);
+
+        /**
+         * Hide view if it overview is null or empty
+         * Show content otherwise
+         */
+        if (m.getOverview() == null || m.getOverview().isEmpty())
+            holder.overview.setVisibility(View.GONE);
+        else {
+            holder.overview.setText(m.getOverview());
+            holder.overview.setVisibility(View.VISIBLE);
+        }
+
+        /**
+         * Hide drawee view image is null or empty
+         * Show image otherwise
+         */
+        if (m.getPosterPath() == null || m.getPosterPath().isEmpty())
+            holder.img.setVisibility(View.GONE);
+        else {
+            Uri uri = Uri.parse(BASE_URL_IMG + m.getPosterPath());
+            holder.img.setImageURI(uri);
+            holder.img.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -82,19 +101,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     public ArrayList<MovieResponse.Movie> getList() {
         return list;
-    }
-
-    public static Bitmap scaleDown(Bitmap realImage, float maxImageSize,
-                                   boolean filter) {
-        float ratio = Math.min(
-                (float) maxImageSize / realImage.getWidth(),
-                (float) maxImageSize / realImage.getHeight());
-        int width = Math.round((float) ratio * realImage.getWidth());
-        int height = Math.round((float) ratio * realImage.getHeight());
-
-        Bitmap newBitmap = Bitmap.createScaledBitmap(realImage, width,
-                height, filter);
-        return newBitmap;
     }
 
     /**
@@ -137,7 +143,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.tv_title) TextView title;
-
         @BindView(R.id.tv_overview) TextView overview;
         @BindView(R.id.drawee_view) SimpleDraweeView img;
 

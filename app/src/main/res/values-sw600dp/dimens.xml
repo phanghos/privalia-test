@@ -6,6 +6,6 @@
     <dimen name="overview_text_size">16sp</dimen>
     <dimen name="empty_text_size">20sp</dimen>
     <dimen name="poster_width">400dp</dimen>
-    <dimen name="poster_height">450dp</dimen>
-    <dimen name="wheel_size">160dp</dimen>
+    <dimen name="poster_height">500dp</dimen>
+    <dimen name="loader_size">80dp</dimen>
 </resources>

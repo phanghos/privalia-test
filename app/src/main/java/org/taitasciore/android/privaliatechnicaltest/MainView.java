@@ -9,12 +9,13 @@ import java.util.ArrayList;
 public interface MainView {
 
     void setTitle(String title);
-    void showProgressWheel();
-    void hideProgressWheel();
+    void showLoader();
+    void hideLoader();
     void hideRefreshLayout();
-    void showButton();
-    void hideButton();
+    void showEmptyListError();
     void showNetworkError();
+    void showResponseErrorForMovies();
+    void showResponseErrorForSearch(String query, boolean newSearch);
     void setData(ArrayList<MovieResponse.Movie> list);
     void addItems(ArrayList<MovieResponse.Movie> list);
 }

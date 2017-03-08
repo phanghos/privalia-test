@@ -10,6 +10,11 @@ import android.net.NetworkInfo;
 
 public final class NetworkUtils {
 
+    /**
+     * This method determines whether connection is established or not
+     * @param context Context
+     * @return True if it is connected. False otherwise
+     */
     public static boolean isConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);

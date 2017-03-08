@@ -4,7 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
  * Created by roberto on 07/03/17.
@@ -55,5 +56,13 @@ public class WorkerFragment extends Fragment {
 
     public void searchMovieByKeyword(String query) {
         searchMovieByKeyword(query, false);
+    }
+
+    public ArrayList<MovieResponse.Movie> getList() {
+        return service.getList();
+    }
+
+    public void cancelPendingRequests() {
+        service.cancelPendingRequests();
     }
 }

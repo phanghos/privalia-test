@@ -1,11 +1,8 @@
 package org.taitasciore.android.privaliatechnicaltest;
 
 import android.app.Application;
-import android.content.Context;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
@@ -14,8 +11,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
  */
 
 public class App extends Application {
-
-    private RefWatcher refWatcher;
 
     @Override
     public void onCreate() {
@@ -26,10 +21,5 @@ public class App extends Application {
                 .setFontAttrId(R.attr.fontPath)
                 .build()
         );
-    }
-
-    public static RefWatcher getRefWatcher(Context context) {
-        App application = (App) context.getApplicationContext();
-        return application.refWatcher;
     }
 }

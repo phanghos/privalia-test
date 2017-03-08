@@ -1,29 +1,29 @@
 package org.taitasciore.android.privaliatechnicaltest;
 
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
-import com.pnikosis.materialishprogress.ProgressWheel;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
@@ -34,7 +34,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class MainActivity extends AppCompatActivity implements MainView {
 
-    String query; // Search query
+    String query = ""; // Search query
 
     WorkerFragment mWorkerFragment; // Retained fragment
 
@@ -42,16 +42,25 @@ public class MainActivity extends AppCompatActivity implements MainView {
     RecyclerView.LayoutManager mLayoutMngr;
     MovieAdapter mAdapter;
 
+    @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.refresh_layout) SwipyRefreshLayout mRefreshLayout;
-    @BindView(R.id.wheel) ProgressWheel wheel;
+    @BindView(R.id.loader) AVLoadingIndicatorView loader;
     @BindView(R.id.tv_empty) TextView tvEmpty;
-    @BindView(R.id.btn_try_again) Button btnTryAgain;
+    @BindView(R.id.main_layout) RelativeLayout layout;
+
+    /**
+     * Scroll to top of list when toolbar is clicked
+     */
+    @OnClick(R.id.toolbar) void onToolbarClicked() {
+        mRecyclerView.scrollToPosition(0);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
         setTitle("Popular movies");
 
         mLayoutMngr = new LinearLayoutManager(this);
@@ -97,9 +106,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.item_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint(getString(R.string.search_hint));
 
@@ -113,6 +121,34 @@ public class MainActivity extends AppCompatActivity implements MainView {
             // Remove this line to show keyboard (default behavior)
         }
 
+        /**
+         * If the close button in the SearchView was clicked (the X), the list of popular movies
+         * will be shown again if it's not empty
+         */
+        ImageView closeButton = (ImageView) searchView.findViewById(R.id.search_close_btn);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchView.setQuery("", false);
+                if (!mWorkerFragment.getList().isEmpty()) {
+                    mWorkerFragment.cancelPendingRequests();
+                    setData(mWorkerFragment.getList());
+                    setTitle("Popular movies");
+                }
+            }
+        });
+
+        /**
+         * The list of popular movies will be shown again if and only if the user
+         * leaves the EditText field manually (by erasing every character)
+         *
+         * If the back button (left arrow) was clicked, return and do nothing.
+         * This check is done by comparing the newText with the current value stored in
+         * query. If the length of current value is > 1 and the newText is empty, that means
+         * that the user clicked on the back button. Else, it means that every character was,
+         * erased one by one by the user, using the keyboard, thus leaving the field blank, which
+         * will cause the list of popular movies to be shown again if it's not empty
+         */
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -121,11 +157,26 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                query = newText;
-                if (!query.isEmpty()) {
-                    mWorkerFragment.searchMovieByKeyword(query, true);
+                if (!newText.equals(query)) {
+                    if (query.length() > 1 && newText.isEmpty()) return false;
+                    query = newText;
                 }
-                return false;
+                else return false;
+
+                // If SearchView is empty and list of popular movies is not empty
+                // list of popular movies will be shown again. Otherwhise, such list
+                // would be lost and could not be shown again unless the app was restarted
+                // Pending requests must be cancelled or unexpected behaviors can happen
+                // Otherwhise start asynchronous search
+                if (query.isEmpty() && !mWorkerFragment.getList().isEmpty()) {
+                    mWorkerFragment.cancelPendingRequests();
+                    setData(mWorkerFragment.getList());
+                    setTitle("Popular movies");
+                }
+                else
+                    mWorkerFragment.searchMovieByKeyword(query, true);
+
+                return true;
             }
         });
 
@@ -147,13 +198,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
     @Override
-    public void showProgressWheel() {
-        wheel.setVisibility(View.VISIBLE);
+    public void showLoader() {
+        loader.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void hideProgressWheel() {
-        wheel.setVisibility(View.GONE);
+    public void hideLoader() {
+        loader.setVisibility(View.GONE);
     }
 
     @Override
@@ -162,18 +213,33 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
     @Override
-    public void showButton() {
-        btnTryAgain.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void hideButton() {
-        btnTryAgain.setVisibility(View.GONE);
+    public void showEmptyListError() {
+        Utils.showSnackbar(layout, "No more results available");
     }
 
     @Override
     public void showNetworkError() {
-        Utils.toast(this, "Something went wrong. Please check your internet connection");
+        Utils.showSnackbar(layout, "Please check your internet connection");
+    }
+
+    @Override
+    public void showResponseErrorForMovies() {
+        Utils.showSnackbar(layout, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mWorkerFragment.getMoviesList();
+            }
+        });
+    }
+
+    @Override
+    public void showResponseErrorForSearch(final String query, final boolean newSearch) {
+        Utils.showSnackbar(layout, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mWorkerFragment.searchMovieByKeyword(query, newSearch);
+            }
+        });
     }
 
     @Override
