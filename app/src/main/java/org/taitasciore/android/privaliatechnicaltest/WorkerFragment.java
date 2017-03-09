@@ -61,8 +61,7 @@ public class WorkerFragment extends Fragment {
     }
 
     public void getMoviesList() {
-        boolean isConnected = NetworkUtils.isConnected((MainActivity) view);
-        if (!isConnected) {
+        if (!isConnected()) {
             view.hideRefreshLayout();
             return;
         }
@@ -74,8 +73,7 @@ public class WorkerFragment extends Fragment {
     }
 
     public void searchMovieByKeyword(String query, boolean newSearch) {
-        boolean isConnected = NetworkUtils.isConnected((MainActivity) view);
-        if (!isConnected) {
+        if (!isConnected()) {
             view.hideRefreshLayout();
             return;
         }
@@ -151,5 +149,9 @@ public class WorkerFragment extends Fragment {
                 view.hideRefreshLayout();
             }
         };
+    }
+
+    private boolean isConnected() {
+        return NetworkUtils.isConnected((MainActivity) view);
     }
 }
