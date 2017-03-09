@@ -24,11 +24,9 @@ public class MovieService {
     private Retrofit retrofit;
     private MovieDbApi api;
     private Call<MovieResponse> curCall; // Current call in case it needs to be cancelled
-    private ArrayList<MovieResponse.Movie> listPopular;
 
     public MovieService(MainView view) {
         this.pg = 1;
-        this.listPopular = new ArrayList<>();
         this.view = view;
 
         // Using this naming policy so that Java camel-cased variables will map to lower case
@@ -60,43 +58,10 @@ public class MovieService {
      * If it's connected, it executes the call asynchronously, sending the list of popular movies
      * to the view (Activity) via the MainView interface in order to populate RecyclerView.Adapter
      */
-    public void getMoviesList() {
+    public void getMoviesList(Callback<MovieResponse> callback) {
         cancelPendingRequests();
-        Call<MovieResponse> call = api.getMoviesList(pg);
-        boolean isConnected = NetworkUtils.isConnected((MainActivity) view);
-        if (!isConnected) {
-            view.hideRefreshLayout();
-            view.showNetworkError();
-            return;
-        }
-        if (getPage() == 1) {
-            view.hideRefreshLayout();
-            view.showLoader();
-        }
-        call.enqueue(new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                view.hideLoader();
-                view.hideRefreshLayout();
-
-                if (response.isSuccessful()) {
-                    MovieResponse movieResponse = response.body();
-                    ArrayList<MovieResponse.Movie> list = movieResponse.getResults();
-                    for (MovieResponse.Movie m : list) listPopular.add(m);
-                    if (getPage() == 1) view.setData(list); // Create adapter if requesting first page
-                    else view.addItems(list); // Add items to existing adapter otherwise
-                    if (!list.isEmpty()) pg++; // Increment page if and only if results were returned;
-                }
-                else
-                    view.showResponseErrorForMovies();
-            }
-
-            @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                view.hideLoader();
-                view.hideRefreshLayout();
-            }
-        });
+        curCall = api.getMoviesList(pg);
+        curCall.enqueue(callback);
     }
 
     /**
@@ -105,42 +70,10 @@ public class MovieService {
      * to the view (Activity) via the MainView interface in order to populate RecyclerView.Adapter
      * @param query Search query
      */
-    public void searchMovieByKeyword(final String query) {
+    public void searchMovieByKeyword(final String query, Callback<MovieResponse> callback) {
         cancelPendingRequests();
-        boolean isConnected = NetworkUtils.isConnected((MainActivity) view);
-        if (!isConnected) {
-            view.hideRefreshLayout();
-            return;
-        }
         curCall = api.searchMovieByKeyword(query, pg);
-        curCall.enqueue(new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                view.hideLoader();
-                view.hideRefreshLayout();
-
-                if (response.isSuccessful()) {
-                    MovieResponse movieResponse = response.body();
-                    ArrayList<MovieResponse.Movie> list = movieResponse.getResults();
-                    if (list.isEmpty() && pg > 1) {
-                        view.showEmptyListError();
-                        return;
-                    }
-                    else if (getPage() == 1) view.setData(list);
-                    else view.addItems(list);
-                    if (!list.isEmpty()) pg++; // Increment page if and only if results were returned;
-                    view.setTitle("Results for '" + query + "'");
-                }
-                else
-                    view.showResponseErrorForSearch(query, pg == 1);
-            }
-
-            @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                view.hideLoader();
-                view.hideRefreshLayout();
-            }
-        });
+        curCall.enqueue(callback);
     }
 
     public int getPage() {
@@ -153,10 +86,6 @@ public class MovieService {
 
     public void setView(MainView view) {
         this.view = view;
-    }
-
-    public ArrayList<MovieResponse.Movie> getList() {
-        return listPopular;
     }
 
     public void cancelPendingRequests() {
